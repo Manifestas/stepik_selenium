@@ -21,3 +21,11 @@ class ProductPage(BasePage):
         alert_text = self.browser.find_element(*ProductPageLocators.ALERT_MESSAGE_TOTAL_BASKET_PRICE).text
         assert product_price == alert_text, 'Alert message basket sum wrong'
 
+    def should_not_be_success_message(self):
+        assert self.is_not_element_present(*ProductPageLocators.ALERT_MESSAGE_PRODUCT_ADDED_TO_BASKET), \
+            'Success message is presented, but should not be'
+
+    def should_success_message_disappear(self):
+        assert self.is_disappeared(*ProductPageLocators.ALERT_MESSAGE_PRODUCT_ADDED_TO_BASKET), \
+            'Success message is not disappear, but should be'
+
