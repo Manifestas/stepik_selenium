@@ -1,7 +1,11 @@
+import time
+
 import pytest
 
 from pages.login_page import LoginPage
 from pages.product_page import ProductPage
+
+TEST_USER_PASSWORD = 'StrongPassword!11'
 
 
 @pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
@@ -38,3 +42,31 @@ def test_guest_can_go_to_login_page_from_product_page(browser):
     page.go_to_login_page()
     login_page = LoginPage(browser, browser.current_url)
     login_page.should_be_login_page()
+
+
+class TestUserAddToBasketFromProductPage:
+
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        self.login_page = LoginPage(browser, 'https://selenium1py.pythonanywhere.com/accounts/login/')
+        self.login_page.open()
+        test_user_email = str(time.time()) + '@testmail.org'
+        self.login_page.register_new_user(test_user_email, TEST_USER_PASSWORD)
+        self.login_page.should_be_authorized_user()
+        yield
+        # после этого ключевого слова начинается teardown
+        # выполнится после каждого теста в классе
+        # удаляем те данные, которые мы создали
+
+    def test_user_can_add_product_to_basket(self, browser):
+        url = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
+        page = ProductPage(browser, url)
+        page.open()
+        page.add_to_basket()
+        page.should_add_product_to_basket()
+
+    def test_user_cant_see_success_message(self, browser):
+        url = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
+        page = ProductPage(browser, url, 0)
+        page.open()
+        page.should_not_be_success_message()
